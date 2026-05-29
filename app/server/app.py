@@ -1,5 +1,6 @@
 """FastAPI application for OverlayTranslator server mode."""
 import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -7,10 +8,10 @@ from app.exceptions import SidecarError
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
 from app.server.schemas import (
-    HealthResponse,
-    TranslateRequest,
-    TranslateResponse,
-    ErrorResponse,
+  HealthResponse,
+  TranslateRequest,
+  TranslateResponse,
+  ErrorResponse,
 )
 
 logger = get_core_logger("fastapi_app")

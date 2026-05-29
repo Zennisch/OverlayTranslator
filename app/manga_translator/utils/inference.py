@@ -10,14 +10,14 @@ from functools import cached_property
 
 import torch
 
+from app.logger import get_translator_logger
 from .generic import (
-    BASE_PATH,
-    download_url_with_progressbar,
-    get_digest,
-    get_filename_from_url,
-    replace_prefix,
+  BASE_PATH,
+  download_url_with_progressbar,
+  get_digest,
+  get_filename_from_url,
+  replace_prefix,
 )
-from ...logger import get_translator_logger
 
 
 class InfererModule(ABC):

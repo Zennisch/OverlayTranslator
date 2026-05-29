@@ -8,10 +8,10 @@ import torch
 
 from .common import OfflineDetector
 from .default_utils import (
-    TextDetection as TextDetectionDefault,
-    SegDetectorRepresenter,
-    adjust_result_coordinates,
-    resize_aspect_ratio,
+  TextDetection as TextDetectionDefault,
+  SegDetectorRepresenter,
+  adjust_result_coordinates,
+  resize_aspect_ratio,
 )
 from ..utils import Quadrilateral, det_rearrange_forward
 

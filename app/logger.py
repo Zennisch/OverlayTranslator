@@ -1,7 +1,8 @@
 import logging
 
-from app.config import settings
 from zns_logging.ZnsLogger import ZnsLogger
+
+from app.config import settings
 
 
 def setup_logging() -> None:

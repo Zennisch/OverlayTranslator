@@ -1,12 +1,13 @@
 import os
 import sys
-from pathlib import Path
+
 
 def add_sys_path(path):
     if path:
         path = os.path.abspath(path)
         if path not in sys.path:
             sys.path.insert(0, path)
+
 
 if getattr(sys, "frozen", False):
     meipass = getattr(sys, "_MEIPASS", "")

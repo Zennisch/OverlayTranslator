@@ -17,6 +17,7 @@ from .xpos_relative_position import XPOS
 from ..utils import Quadrilateral, TextBlock, chunks
 from ..utils.generic import AvgMeter
 
+
 # Roformer with Xpos and Local Attention ViT
 # Roformer with Xpos
 

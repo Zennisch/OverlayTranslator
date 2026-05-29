@@ -1,5 +1,6 @@
 """Pydantic schemas for API requests and responses."""
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, List
+
 from pydantic import BaseModel, Field
 
 
@@ -21,13 +22,13 @@ class TranslateRequest(BaseModel):
     imagePath: str = Field(..., description="Absolute path to the image file to translate")
     postId: Optional[str] = Field("0", description="Optional post/metadata ID")
     targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
-    
+
     # Optional device settings
     device: Optional[str] = Field(None, description="Torch device for detection & OCR (cpu, cuda, mps, auto)")
     llmDevice: Optional[str] = Field(None, description="Execution device for LLM (cpu, cuda, mps, auto)")
     modelPath: Optional[str] = Field(None, description="Custom path to GGUF model")
     translator: Optional[str] = Field(None, description="Translator backend: 'llm' or 'deep-translator'")
-    
+
     # LLM tuning parameters
     llmGpuLayers: Optional[int] = Field(None, description="Number of GPU layers for LLM")
     llmContextSize: Optional[int] = Field(None, description="LLM context size (512-8192)")
@@ -40,11 +41,11 @@ class TranslateRequest(BaseModel):
     llmForceGpu: Optional[bool] = Field(None, description="Force LLM to use GPU")
     llmAutoDowngrade: Optional[bool] = Field(None, description="Auto-downgrade LLM on VRAM contention")
     llmContentionThreshold: Optional[int] = Field(None, description="VRAM threshold for LLM contention (GB)")
-    
+
     # Hugging Face model options
     hfRepo: Optional[str] = Field(None, description="Hugging Face repository ID for GGUF model")
     hfModelFile: Optional[str] = Field(None, description="GGUF model filename in HF repository")
-    
+
     # Detection parameters
     detectionSize: Optional[int] = Field(None, description="Detection input size")
     textThreshold: Optional[float] = Field(None, description="Detection text threshold")
@@ -54,7 +55,7 @@ class TranslateRequest(BaseModel):
     detGammaCorrect: Optional[bool] = Field(None, description="Apply gamma correction to detection")
     detRotate: Optional[bool] = Field(None, description="Enable detection rotation")
     detAutoRotate: Optional[bool] = Field(None, description="Enable detection auto-rotation")
-    
+
     # Misc
     verbose: Optional[bool] = Field(None, description="Enable verbose logging")
 

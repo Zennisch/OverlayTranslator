@@ -1,12 +1,14 @@
 """Singleton pipeline manager for concurrent request handling."""
+
 import asyncio
 from enum import Enum
 from typing import Optional, Dict, Any
+
 import psutil
 
 from app.config import settings
-from app.logger import get_core_logger
 from app.exceptions import ModelNotReadyError
+from app.logger import get_core_logger
 from app.service import TranslationPipelineCLI
 
 logger = get_core_logger("pipeline_manager")
@@ -14,6 +16,7 @@ logger = get_core_logger("pipeline_manager")
 
 class PipelineStatus(str, Enum):
     """Pipeline initialization status."""
+
     INITIALIZING = "initializing"
     READY = "ready"
     FAILED = "failed"
@@ -66,6 +69,7 @@ class PipelineManager:
                 if self._pipeline._device == "cuda":
                     try:
                         import torch
+
                         device_props = torch.cuda.get_device_properties(0)
                         status_dict["gpu_device"] = device_props.name
                         total_vram = device_props.total_memory / (1024**3)
@@ -104,11 +108,7 @@ class PipelineManager:
                 raise
 
     async def translate(
-        self,
-        image_path: str,
-        post_id: str = "0",
-        target_lang: str = "ENG",
-        **optional_settings
+        self, image_path: str, post_id: str = "0", target_lang: str = "ENG", **optional_settings
     ) -> Dict[str, Any]:
         """
         Translate an image using the pipeline.
@@ -136,9 +136,7 @@ class PipelineManager:
             InvalidInputError: If image path is invalid
         """
         if not self.is_ready:
-            raise ModelNotReadyError(
-                f"Pipeline is not ready: {self._status.value}"
-            )
+            raise ModelNotReadyError(f"Pipeline is not ready: {self._status.value}")
 
         # Apply optional settings temporarily for this request
         original_settings = {}

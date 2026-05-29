@@ -16,7 +16,7 @@ class Settings:
         self.det_auto_rotate = False
 
         self.verbose = False
-        
+
         # Server configuration
         self.server_host = "127.0.0.1"
         self.server_port = 7861

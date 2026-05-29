@@ -1,8 +1,8 @@
 import asyncio
 from typing import List
 
-from app.config import settings
 from .common import OfflineTranslator
+
 
 # Online translation using deep-translator (Google Translate, etc.)
 

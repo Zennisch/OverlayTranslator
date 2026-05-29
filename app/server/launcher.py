@@ -1,4 +1,5 @@
 """Server launcher module for OverlayTranslator."""
+
 import uvicorn
 
 from app.config import settings

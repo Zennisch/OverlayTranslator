@@ -122,6 +122,7 @@ async def async_main():
     if args.server:
         logger.info(f"Starting server mode on port {args.serverPort}")
         from app.server.launcher import run_server
+
         await run_server(port=args.serverPort)
         return
 
@@ -175,6 +176,7 @@ async def async_main():
 
         # Wait for any active background probe thread to finish before exiting (so cache can be written)
         import threading
+
         for t in threading.enumerate():
             if t.name == "BackgroundProbe":
                 logger.info("Waiting for background layer probing to complete before exiting...")
