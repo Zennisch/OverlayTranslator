@@ -4,7 +4,7 @@ import torch
 from manga_translator.detection.default import DefaultDetector
 from manga_translator.ocr import Model48pxOCR, Ocr, OcrConfig
 from manga_translator.textline_merge import dispatch as dispatch_textline_merge
-from manga_translator.translators.deep_translator_wrapper import DeepTranslatorWrapper
+from manga_translator.translators.deep_translator import DeepTranslator
 from manga_translator.utils import load_image
 from PIL import Image
 
@@ -64,7 +64,7 @@ class TranslationPipelineCLI:
 
             self._detector = DefaultDetector()
             self._ocr = Model48pxOCR()
-            self._translator = DeepTranslatorWrapper()
+            self._translator = DeepTranslator()
             logger.info("Using DeepTranslator backend (Google Translate)")
 
             await self._detector.load(DEVICE)

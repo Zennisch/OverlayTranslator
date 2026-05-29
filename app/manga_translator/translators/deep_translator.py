@@ -3,10 +3,8 @@ from typing import List
 
 from .common import OfflineTranslator
 
-# Online translation using deep-translator (Google Translate, etc.)
 
-
-class DeepTranslatorWrapper(OfflineTranslator):
+class DeepTranslator(OfflineTranslator):
     """
     Online translator using deep-translator library.
     Supports Google Translate and other online translation services.
