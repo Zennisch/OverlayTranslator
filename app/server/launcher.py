@@ -31,12 +31,9 @@ async def run_server(
             logger.info("Pipeline initialized, starting server...")
         except Exception as exc:
             logger.error(f"Pipeline initialization failed, server will not accept requests: {exc}")
-            # Continue anyway - server will return 503 on requests
 
-    # Import app here to avoid circular imports
     from app.server.app import app
 
-    # Configure and run uvicorn server
     config = uvicorn.Config(
         app,
         host=host,

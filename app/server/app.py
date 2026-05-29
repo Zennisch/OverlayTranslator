@@ -36,12 +36,9 @@ def create_app() -> FastAPI:
             status=status["status"],
             ready=status["ready"],
             error=status.get("error"),
-            detector_device=status.get("detector_device"),
-            translator_device=status.get("translator_device"),
-            gpu_device=status.get("gpu_device"),
+            device=status.get("device"),
             system_memory_gb=status.get("system_memory_gb"),
             system_memory_used_gb=status.get("system_memory_used_gb"),
-            gpu_total_memory_gb=status.get("gpu_total_memory_gb"),
         )
 
         # Return 503 if not ready

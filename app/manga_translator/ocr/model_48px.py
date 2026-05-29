@@ -17,10 +17,6 @@ from .common import OfflineOCR
 from .config import OcrConfig
 from .xpos_relative_position import XPOS
 
-# Roformer with Xpos and Local Attention ViT
-# Roformer with Xpos
-
-
 class Model48pxOCR(OfflineOCR):
     _MODEL_MAPPING = {
         "model": {

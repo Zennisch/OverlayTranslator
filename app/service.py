@@ -8,7 +8,7 @@ from manga_translator.translators.deep_translator_wrapper import DeepTranslatorW
 from manga_translator.utils import load_image
 from PIL import Image
 
-from app.config import settings
+from app.config import settings, DEVICE
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
 
@@ -18,7 +18,6 @@ logger = get_core_logger("service")
 class TranslationPipelineCLI:
     def __init__(self) -> None:
         self._ready = False
-        self._device: str = "cpu"
 
         self._detector: DefaultDetector = None
         self._ocr: Model48pxOCR = None
@@ -57,9 +56,6 @@ class TranslationPipelineCLI:
     async def initialize(self) -> None:
         """Asynchronously load and prepare the pipeline detector, OCR, and GGUF LLM models."""
         try:
-            # Use CPU for all components (hardcoded, no device selection)
-            self._device = "cpu"
-
             self._ocr_config = OcrConfig(
                 ocr=Ocr.ocr48px,
                 min_text_length=1,
@@ -71,12 +67,12 @@ class TranslationPipelineCLI:
             self._translator = DeepTranslatorWrapper()
             logger.info("Using DeepTranslator backend (Google Translate)")
 
-            await self._detector.load(self._device)
-            await self._ocr.load(self._device)
-            await self._translator.load("auto", settings.target_lang, self._device)
+            await self._detector.load(DEVICE)
+            await self._ocr.load(DEVICE)
+            await self._translator.load(settings.source_lang, settings.target_lang, DEVICE)
 
             self._ready = True
-            logger.info(f"Models successfully initialized: device={self._device}")
+            logger.info(f"Models successfully initialized: device={DEVICE}")
 
         except Exception as exc:
             self._ready = False
@@ -131,13 +127,10 @@ class TranslationPipelineCLI:
                     "postId": post_id,
                     "imagePath": image_path,
                     "originalSize": {"width": img_width, "height": img_height},
-                    "translator": "deep-translator",
-                    "elapsedMs": int((time.perf_counter() - started) * 1000),
                     "timings": timings_dict,
                     "overlays": overlays,
                 }
             else:
-                # Minimal response: only postId, imagePath, and overlays
                 return {
                     "postId": post_id,
                     "imagePath": image_path,
@@ -157,7 +150,7 @@ class TranslationPipelineCLI:
                     "ocrMs": 0,
                     "mergeMs": 0,
                     "translateMs": 0,
-                    "detectorDevice": self._device,
+                    "device": DEVICE,
                     "detectedTextlines": 0,
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
@@ -186,7 +179,7 @@ class TranslationPipelineCLI:
                     "ocrMs": ocr_ms,
                     "mergeMs": 0,
                     "translateMs": 0,
-                    "detectorDevice": self._device,
+                    "device": DEVICE,
                     "detectedTextlines": detected_textlines,
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
@@ -228,7 +221,7 @@ class TranslationPipelineCLI:
                 "ocrMs": ocr_ms,
                 "mergeMs": merge_ms,
                 "translateMs": translate_ms,
-                "detectorDevice": self._device,
+                "device": DEVICE,
                 "detectedTextlines": detected_textlines,
                 "recognizedTextlines": recognized_textlines,
                 "mergedRegions": merged_regions,

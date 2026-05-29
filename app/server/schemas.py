@@ -3,31 +3,25 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from app.dto import TextOverlay, TranslationTimings
+
 
 class HealthResponse(BaseModel):
     """Health check response."""
     status: str = Field(..., description="Pipeline status: initializing, ready, or failed")
     ready: bool = Field(..., description="True if pipeline is ready to handle requests")
     error: Optional[str] = Field(None, description="Error message if status is failed")
-    detector_device: Optional[str] = Field(None, description="Device used for detection")
-    translator_device: Optional[str] = Field(None, description="Device used for translation")
-    gpu_device: Optional[str] = Field(None, description="GPU device name if CUDA is used")
+    device: Optional[str] = Field(None, description="Device used for execution (always cpu)")
     system_memory_gb: Optional[float] = Field(None, description="Total system RAM in GB")
     system_memory_used_gb: Optional[float] = Field(None, description="Used system RAM in GB")
-    gpu_total_memory_gb: Optional[float] = Field(None, description="Total GPU VRAM in GB")
 
 
 class TranslateRequest(BaseModel):
     """Translation request payload."""
     imagePath: str = Field(..., description="Absolute path to the image file to translate")
     postId: Optional[str] = Field("0", description="Optional post/metadata ID")
-    targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
     sourceLang: Optional[str] = Field("JPN", description="Source language (JPN, ENG, etc. or 'auto' for auto-detection)")
-
-    # Optional device settings
-    llmDevice: Optional[str] = Field(None, description="Execution device for LLM (cpu, cuda, mps, auto)")
-    modelPath: Optional[str] = Field(None, description="Custom path to GGUF model")
-    translator: Optional[str] = Field(None, description="Translator backend: 'llm' or 'deep-translator'")
+    targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
 
     # LLM tuning parameters
     llmGpuLayers: Optional[int] = Field(None, description="Number of GPU layers for LLM")
@@ -58,34 +52,6 @@ class TranslateRequest(BaseModel):
 
     # Misc
     verbose: Optional[bool] = Field(None, description="Enable verbose logging")
-
-
-class TextOverlay(BaseModel):
-    """Translated text overlay region."""
-    id: str
-    xywh: Dict[str, float]
-    polygon: List[Dict[str, float]]
-    sourceText: str
-    translatedText: str
-    confidence: float
-    sourceLang: str
-
-
-class TranslationTimings(BaseModel):
-    """Timing breakdown for the translation pipeline."""
-    totalMs: int
-    imageLoadMs: int
-    imageDecodeMs: int
-    detectMs: int
-    ocrMs: int
-    mergeMs: int
-    translateMs: int
-    normalizeMs: int
-    detectorDevice: str
-    translatorDevice: str
-    detectedTextlines: int
-    recognizedTextlines: int
-    mergedRegions: int
 
 
 class TranslateResponse(BaseModel):

@@ -41,14 +41,14 @@ async def async_main():
     )
 
     parser.add_argument(
-        "--targetLang",
-        default="ENG",
-        help="Target translation language",
-    )
-    parser.add_argument(
         "--sourceLang",
         default="JPN",
         help="Source language (JPN, ENG, etc. or 'auto' for auto-detection)",
+    )
+    parser.add_argument(
+        "--targetLang",
+        default="ENG",
+        help="Target translation language",
     )
 
     parser.add_argument(
@@ -106,18 +106,6 @@ async def async_main():
 
     args = parser.parse_args()
 
-    # Validate arguments based on mode
-    if not args.server and not args.imagePath:
-        parser.error("--imagePath is required for CLI mode (or use --server for server mode)")
-
-    # Sync CLI args with settings
-    settings.target_lang = args.targetLang
-    settings.source_lang = args.sourceLang
-
-    if args.logLevel:
-        settings.log_level = args.logLevel
-        setup_logging()
-
     # If server mode, launch server and exit
     if args.server:
         logger.info(f"Starting server mode on port {args.serverPort}")
@@ -125,6 +113,18 @@ async def async_main():
 
         await run_server(port=args.serverPort)
         return
+
+    # Validate arguments based on mode
+    if not args.server and not args.imagePath:
+        parser.error("--imagePath is required for CLI mode (or use --server for server mode)")
+
+    # Sync CLI args with settings
+    settings.source_lang = args.sourceLang
+    settings.target_lang = args.targetLang
+
+    if args.logLevel:
+        settings.log_level = args.logLevel
+        setup_logging()    
 
     if args.detectionSize is not None:
         settings.detection_size = args.detectionSize

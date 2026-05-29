@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import psutil
 
-from app.config import settings
+from app.config import settings, DEVICE
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
 from app.service import TranslationPipelineCLI
@@ -65,19 +65,8 @@ class PipelineManager:
                 status_dict["system_memory_gb"] = round(vm.total / (1024**3), 2)
                 status_dict["system_memory_used_gb"] = round(vm.used / (1024**3), 2)
 
-                # Get GPU info if CUDA is in use
-                if self._pipeline._device == "cuda":
-                    try:
-                        import torch
-
-                        device_props = torch.cuda.get_device_properties(0)
-                        status_dict["gpu_device"] = device_props.name
-                        total_vram = device_props.total_memory / (1024**3)
-                        status_dict["gpu_total_memory_gb"] = round(total_vram, 2)
-                    except Exception:
-                        pass
-
-                status_dict["detector_device"] = self._pipeline._device
+                # Device is always CPU (hardcoded)
+                status_dict["device"] = DEVICE
             except Exception as exc:
                 logger.warning(f"Failed to get detailed status: {exc}")
 
@@ -118,7 +107,6 @@ class PipelineManager:
             post_id: Optional metadata ID
             target_lang: Target translation language (e.g., "ENG", "VIE")
             **optional_settings: Optional CLI flags to override defaults
-                - device: torch device (cpu, cuda, mps, auto)
                 - detectionSize: Detection input size
                 - textThreshold: Detection text threshold
                 - boxThreshold: Detection box threshold
@@ -127,6 +115,7 @@ class PipelineManager:
                 - detGammaCorrect: Apply gamma correction
                 - detRotate: Enable detection rotation
                 - detAutoRotate: Enable detection auto-rotation
+                - sourceLang: Source language for translation
 
         Returns:
             Dictionary with translation results
