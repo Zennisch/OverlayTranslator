@@ -2,7 +2,7 @@
 
 import asyncio
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import psutil
 

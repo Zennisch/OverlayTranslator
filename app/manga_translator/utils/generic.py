@@ -2,14 +2,14 @@ import hashlib
 import os
 import re
 import sys
-from typing import List, Tuple, Callable, Optional
+import unicodedata
+from typing import Callable, List, Optional, Tuple
 
 import cv2
 import einops
 import numpy as np
 import requests
 import tqdm
-import unicodedata
 from PIL import Image
 from shapely.geometry import MultiPoint, Polygon
 

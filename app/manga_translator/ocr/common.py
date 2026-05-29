@@ -6,8 +6,8 @@ from typing import List, Union
 import networkx as nx
 import numpy as np
 
-from .config import OcrConfig
 from ..utils import InfererModule, ModelWrapper, Quadrilateral, TextBlock
+from .config import OcrConfig
 
 
 class CommonOCR(InfererModule):

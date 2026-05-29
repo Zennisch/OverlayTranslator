@@ -11,12 +11,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..utils import Quadrilateral, TextBlock, chunks
+from ..utils.generic import AvgMeter
 from .common import OfflineOCR
 from .config import OcrConfig
 from .xpos_relative_position import XPOS
-from ..utils import Quadrilateral, TextBlock, chunks
-from ..utils.generic import AvgMeter
-
 
 # Roformer with Xpos and Local Attention ViT
 # Roformer with Xpos

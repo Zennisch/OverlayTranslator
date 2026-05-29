@@ -26,7 +26,7 @@ async def run_server(
 
     if blocking_init:
         try:
-            logger.info(f"Initializing pipeline before starting server (blocking)...")
+            logger.info("Initializing pipeline before starting server (blocking)...")
             await pipeline_manager.initialize()
             logger.info("Pipeline initialized, starting server...")
         except Exception as exc:

@@ -6,7 +6,7 @@ import sys
 
 from app.config import settings
 from app.exceptions import SidecarError
-from app.logger import setup_logging, get_core_logger
+from app.logger import get_core_logger, setup_logging
 
 setup_logging()
 logger = get_core_logger("cli")

@@ -1,6 +1,7 @@
 import json
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Pre-import app.bootstrap and app.service to ensure path resolutions and module attribute bindings are established for mock patches
 from app.__main__ import async_main

@@ -3,7 +3,6 @@ from typing import List
 
 from .common import OfflineTranslator
 
-
 # Online translation using deep-translator (Google Translate, etc.)
 
 

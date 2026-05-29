@@ -1,16 +1,16 @@
 import time
 
 import torch
-from PIL import Image
-
-from app.config import settings
-from app.exceptions import ModelNotReadyError
-from app.logger import get_core_logger
 from manga_translator.detection.default import DefaultDetector
 from manga_translator.ocr import Model48pxOCR, Ocr, OcrConfig
 from manga_translator.textline_merge import dispatch as dispatch_textline_merge
 from manga_translator.translators.deep_translator_wrapper import DeepTranslatorWrapper
 from manga_translator.utils import load_image
+from PIL import Image
+
+from app.config import settings
+from app.exceptions import ModelNotReadyError
+from app.logger import get_core_logger
 
 logger = get_core_logger("service")
 

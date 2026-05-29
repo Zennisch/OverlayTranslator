@@ -1,8 +1,9 @@
 """Tests for OverlayTranslator server endpoints."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from fastapi.testclient import TestClient
+
 from app.server.app import app
 from app.server.pipeline_manager import PipelineManager, PipelineStatus
 
@@ -16,8 +17,8 @@ def client():
 @pytest.fixture
 def sample_image_path(tmp_path):
     """Create a dummy image file for testing."""
-    from PIL import Image
     import numpy as np
+    from PIL import Image
 
     # Create a simple 100x100 RGB image
     img_array = np.random.randint(0, 255, (100, 100, 3), dtype=np.uint8)

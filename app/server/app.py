@@ -8,10 +8,10 @@ from app.exceptions import SidecarError
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
 from app.server.schemas import (
-  HealthResponse,
-  TranslateRequest,
-  TranslateResponse,
-  ErrorResponse,
+    ErrorResponse,
+    HealthResponse,
+    TranslateRequest,
+    TranslateResponse,
 )
 
 logger = get_core_logger("fastapi_app")

@@ -6,14 +6,16 @@ import einops
 import numpy as np
 import torch
 
+from ..utils import Quadrilateral, det_rearrange_forward
 from .common import OfflineDetector
 from .default_utils import (
-  TextDetection as TextDetectionDefault,
-  SegDetectorRepresenter,
-  adjust_result_coordinates,
-  resize_aspect_ratio,
+    SegDetectorRepresenter,
+    adjust_result_coordinates,
+    resize_aspect_ratio,
 )
-from ..utils import Quadrilateral, det_rearrange_forward
+from .default_utils import (
+    TextDetection as TextDetectionDefault,
+)
 
 MODEL = None
 
