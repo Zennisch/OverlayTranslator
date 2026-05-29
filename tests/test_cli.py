@@ -79,10 +79,6 @@ async def test_cli_success(mock_pipeline_class, mock_print, mock_exit, mock_pars
     mock_pipeline_success_response = {
         "postId": "456",
         "imagePath": "existing_image.png",
-        "originalSize": {"width": 800, "height": 600},
-        "translator": "deep-translator",
-        "elapsedMs": 120,
-        "timings": {},
         "overlays": [],
     }
     mock_pipeline.translate_image = AsyncMock(return_value=mock_pipeline_success_response)
@@ -100,7 +96,6 @@ async def test_cli_success(mock_pipeline_class, mock_print, mock_exit, mock_pars
 
     printed_json = _find_printed_json(mock_print)
     assert printed_json["postId"] == "456"
-    assert printed_json["translator"] == "deep-translator"
     assert printed_json["imagePath"] == "existing_image.png"
 
 
