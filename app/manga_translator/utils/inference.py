@@ -17,12 +17,12 @@ from .generic import (
     get_filename_from_url,
     replace_prefix,
 )
-from .log import get_logger
+from ...logger import get_translator_logger
 
 
 class InfererModule(ABC):
     def __init__(self):
-        self.logger = get_logger(self.__class__.__name__)
+        self.logger = get_translator_logger(self.__class__.__name__)
         super().__init__()
 
     def parse_args(self, args: object):

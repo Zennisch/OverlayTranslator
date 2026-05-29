@@ -586,7 +586,7 @@ Translate image to target language.
 
 ## 📋 Error Handling
 
-Exception hierarchy in [app/core/exceptions.py](app/core/exceptions.py):
+Exception hierarchy in [app/core/exceptions.py](app/exceptions.py):
 
 | Exception | HTTP | Retryable | Description |
 |-----------|------|-----------|-------------|

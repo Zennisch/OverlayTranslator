@@ -5,16 +5,16 @@ import os
 import sys
 
 from app.config import settings
-from app.core.exceptions import SidecarError
-from app.core.logger import setup_logging, get_logger
+from app.exceptions import SidecarError
+from app.logger import setup_logging, get_core_logger
 
 setup_logging()
-logger = get_logger("cli")
+logger = get_core_logger("cli")
 
 
 async def async_main():
     parser = argparse.ArgumentParser(description="Overlay Translator - CLI Engine or API Server")
-    
+
     # Server mode flag
     parser.add_argument(
         "--server",
@@ -27,7 +27,7 @@ async def async_main():
         default=7861,
         help="Server port when running in server mode (default: 7861)",
     )
-    
+
     # CLI mode arguments (only required when not in server mode)
     parser.add_argument(
         "--imagePath",
@@ -105,7 +105,7 @@ async def async_main():
     )
 
     args = parser.parse_args()
-    
+
     # Validate arguments based on mode
     if not args.server and not args.imagePath:
         parser.error("--imagePath is required for CLI mode (or use --server for server mode)")
@@ -117,7 +117,7 @@ async def async_main():
     if args.logLevel:
         settings.log_level = args.logLevel
         setup_logging()
-    
+
     # If server mode, launch server and exit
     if args.server:
         logger.info(f"Starting server mode on port {args.serverPort}")

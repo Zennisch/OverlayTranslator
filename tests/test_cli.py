@@ -1,13 +1,10 @@
-import sys
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Pre-import app.bootstrap and app.service to ensure path resolutions and module attribute bindings are established for mock patches
-import app.bootstrap
-import app.service
 from app.__main__ import async_main
-from app.core.exceptions import ModelNotReadyError
+from app.exceptions import ModelNotReadyError
 
 
 def _find_printed_json(mock_print) -> dict:

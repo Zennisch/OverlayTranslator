@@ -1,12 +1,11 @@
 """Server launcher module for OverlayTranslator."""
-import asyncio
 import uvicorn
 
 from app.config import settings
-from app.core.logger import get_logger
+from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
 
-logger = get_logger("launcher")
+logger = get_core_logger("launcher")
 
 
 async def run_server(
@@ -16,14 +15,14 @@ async def run_server(
 ) -> None:
     """
     Run the OverlayTranslator API server.
-    
+
     Args:
         host: Server bind address
         port: Server listen port
         blocking_init: If True, blocks until pipeline is initialized before accepting requests
     """
     pipeline_manager = PipelineManager()
-    
+
     if blocking_init:
         try:
             logger.info(f"Initializing pipeline before starting server (blocking)...")
@@ -32,10 +31,10 @@ async def run_server(
         except Exception as exc:
             logger.error(f"Pipeline initialization failed, server will not accept requests: {exc}")
             # Continue anyway - server will return 503 on requests
-    
+
     # Import app here to avoid circular imports
     from app.server.app import app
-    
+
     # Configure and run uvicorn server
     config = uvicorn.Config(
         app,
@@ -45,6 +44,6 @@ async def run_server(
         access_log=True,
     )
     server = uvicorn.Server(config)
-    
+
     logger.info(f"Starting server on {host}:{port}")
     await server.serve()
