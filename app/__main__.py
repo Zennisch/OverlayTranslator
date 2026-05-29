@@ -4,10 +4,6 @@ import json
 import os
 import sys
 
-import app.bootstrap
-
-_ = app.bootstrap
-
 from app.config import settings
 from app.core.exceptions import SidecarError
 from app.core.logger import setup_logging, get_logger

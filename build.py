@@ -50,7 +50,6 @@ def build(release=False):
         "--hidden-import=tqdm",
         "--hidden-import=requests",
         # App modules
-        "--hidden-import=app.bootstrap",
         "--hidden-import=app.config",
         "--hidden-import=app.service",
         "--hidden-import=app.core",
