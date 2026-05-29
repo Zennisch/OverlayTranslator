@@ -143,7 +143,6 @@ class PipelineManager:
         try:
             # Map request field names to settings attribute names
             settings_map = {
-                "device": "device",
                 "detectionSize": "detection_size",
                 "textThreshold": "text_threshold",
                 "boxThreshold": "box_threshold",
@@ -152,6 +151,7 @@ class PipelineManager:
                 "detGammaCorrect": "det_gamma_correct",
                 "detRotate": "det_rotate",
                 "detAutoRotate": "det_auto_rotate",
+                "sourceLang": "source_lang",
                 "verbose": "verbose",
             }
 

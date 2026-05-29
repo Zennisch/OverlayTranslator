@@ -3,7 +3,7 @@ class Settings:
         # Configuration properties with static defaults (fully overridden by CLI flags)
         self.log_level = "info"
         self.target_lang = "ENG"
-        self.device = "auto"
+        self.source_lang = "JPN"
 
         self.detection_size = 2048
         self.text_threshold = 0.5

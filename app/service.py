@@ -25,32 +25,7 @@ class TranslationPipelineCLI:
         self._translator = None
         self._ocr_config: OcrConfig = None
 
-    @staticmethod
-    def _resolve_device(torch_module, requested: str) -> str:
-        req = (requested or "auto").strip().lower()
-        if req not in {"auto", "cpu", "cuda", "mps"}:
-            raise ValueError("SIDECAR_DEVICE must be one of: auto, cpu, cuda, mps")
-
-        if req == "cpu":
-            return "cpu"
-
-        if req == "cuda":
-            if torch_module.cuda.is_available():
-                return "cuda"
-            raise RuntimeError("Requested CUDA device is not available in this environment")
-
-        if req == "mps":
-            if hasattr(torch_module.backends, "mps") and torch_module.backends.mps.is_available():
-                return "mps"
-            raise RuntimeError("Requested MPS device is not available in this environment")
-
-        if torch_module.cuda.is_available():
-            return "cuda"
-        if hasattr(torch_module.backends, "mps") and torch_module.backends.mps.is_available():
-            return "mps"
-        return "cpu"
-
-    def _to_overlay_item(self, idx: int, region) -> dict:
+    def _to_overlay_item(self, idx: int, region, source_lang: str) -> dict:
         xywh = region.xywh
         min_rect = region.min_rect[0]
 
@@ -76,14 +51,14 @@ class TranslationPipelineCLI:
             "sourceText": str(region.text or ""),
             "translatedText": str(region.translation or ""),
             "confidence": confidence,
-            "sourceLang": "JPN",
+            "sourceLang": source_lang,
         }
 
     async def initialize(self) -> None:
         """Asynchronously load and prepare the pipeline detector, OCR, and GGUF LLM models."""
         try:
-
-            self._device = self._resolve_device(torch, settings.device)
+            # Use CPU for all components (hardcoded, no device selection)
+            self._device = "cpu"
 
             self._ocr_config = OcrConfig(
                 ocr=Ocr.ocr48px,
@@ -150,16 +125,24 @@ class TranslationPipelineCLI:
         detect_ms = int((time.perf_counter() - t0) * 1000)
         detected_textlines = len(textlines)
 
-        def build_response(overlays: list, timings_dict: dict) -> dict:
-            return {
-                "postId": post_id,
-                "imagePath": image_path,
-                "originalSize": {"width": img_width, "height": img_height},
-                "translator": "deep-translator",
-                "elapsedMs": int((time.perf_counter() - started) * 1000),
-                "timings": timings_dict,
-                "overlays": overlays,
-            }
+        def build_response(overlays: list, timings_dict: dict, verbose: bool) -> dict:
+            if verbose:
+                return {
+                    "postId": post_id,
+                    "imagePath": image_path,
+                    "originalSize": {"width": img_width, "height": img_height},
+                    "translator": "deep-translator",
+                    "elapsedMs": int((time.perf_counter() - started) * 1000),
+                    "timings": timings_dict,
+                    "overlays": overlays,
+                }
+            else:
+                # Minimal response: only postId, imagePath, and overlays
+                return {
+                    "postId": post_id,
+                    "imagePath": image_path,
+                    "overlays": overlays,
+                }
 
         # Handle case when no text is detected
         if not textlines:
@@ -179,6 +162,7 @@ class TranslationPipelineCLI:
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
                 },
+                settings.verbose,
             )
 
         # 4. Recognize characters
@@ -207,6 +191,7 @@ class TranslationPipelineCLI:
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
                 },
+                settings.verbose,
             )
 
         # 5. Merge aligned textlines
@@ -230,7 +215,7 @@ class TranslationPipelineCLI:
         overlays = []
         for idx, region in enumerate(text_regions):
             region.translation = translations[idx] if idx < len(translations) else ""
-            overlays.append(self._to_overlay_item(idx, region))
+            overlays.append(self._to_overlay_item(idx, region, settings.source_lang))
 
         total_ms = int((time.perf_counter() - started) * 1000)
         return build_response(
@@ -248,4 +233,5 @@ class TranslationPipelineCLI:
                 "recognizedTextlines": recognized_textlines,
                 "mergedRegions": merged_regions,
             },
+            settings.verbose,
         )

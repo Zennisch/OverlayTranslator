@@ -46,9 +46,9 @@ async def async_main():
         help="Target translation language",
     )
     parser.add_argument(
-        "--device",
-        default="auto",
-        help="Torch execution device for detection & OCR (cpu, cuda, mps, auto)",
+        "--sourceLang",
+        default="JPN",
+        help="Source language (JPN, ENG, etc. or 'auto' for auto-detection)",
     )
 
     parser.add_argument(
@@ -112,7 +112,7 @@ async def async_main():
 
     # Sync CLI args with settings
     settings.target_lang = args.targetLang
-    settings.device = args.device
+    settings.source_lang = args.sourceLang
 
     if args.logLevel:
         settings.log_level = args.logLevel

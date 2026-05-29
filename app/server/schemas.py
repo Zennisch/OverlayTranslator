@@ -22,9 +22,9 @@ class TranslateRequest(BaseModel):
     imagePath: str = Field(..., description="Absolute path to the image file to translate")
     postId: Optional[str] = Field("0", description="Optional post/metadata ID")
     targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
+    sourceLang: Optional[str] = Field("JPN", description="Source language (JPN, ENG, etc. or 'auto' for auto-detection)")
 
     # Optional device settings
-    device: Optional[str] = Field(None, description="Torch device for detection & OCR (cpu, cuda, mps, auto)")
     llmDevice: Optional[str] = Field(None, description="Execution device for LLM (cpu, cuda, mps, auto)")
     modelPath: Optional[str] = Field(None, description="Custom path to GGUF model")
     translator: Optional[str] = Field(None, description="Translator backend: 'llm' or 'deep-translator'")
