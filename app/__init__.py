@@ -2,25 +2,22 @@ import os
 import sys
 from pathlib import Path
 
-# When packaged/frozen under PyInstaller, sys.frozen is True and sys._MEIPASS contains the runtime temporary folder path.
-# We must insert it to sys.path to resolve absolute imports cleanly.
+def add_sys_path(path):
+    if path:
+        path = os.path.abspath(path)
+        if path not in sys.path:
+            sys.path.insert(0, path)
+
 if getattr(sys, "frozen", False):
     meipass = getattr(sys, "_MEIPASS", "")
-    if meipass and meipass not in sys.path:
-        sys.path.insert(0, meipass)
-
     app_dir = os.path.join(meipass, "app")
-    if os.path.exists(app_dir) and app_dir not in sys.path:
-        sys.path.insert(0, app_dir)
+
+    add_sys_path(meipass)
+    add_sys_path(app_dir)
+
 else:
-    # Development mode: Add project root and app root to sys.path
-    project_root = Path(__file__).resolve().parents[1]
-    app_root = project_root / "app"
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    app_root = os.path.join(project_root, "app")
 
-    project_root_str = str(project_root)
-    app_root_str = str(app_root)
-
-    if app_root_str not in sys.path:
-        sys.path.insert(0, app_root_str)
-    if project_root_str not in sys.path:
-        sys.path.insert(0, project_root_str)
+    add_sys_path(project_root)
+    add_sys_path(app_root)
