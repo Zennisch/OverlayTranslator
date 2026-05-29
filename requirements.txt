@@ -21,3 +21,4 @@ pydantic
 psutil
 py7zr
 zns-logging
+httpx
