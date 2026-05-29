@@ -1,8 +1,8 @@
 from typing import Any, Optional
 
 
-class SidecarError(Exception):
-    """Base exception for all sidecar related errors."""
+class GlobalError(Exception):
+    """Base exception for all errors."""
 
     def __init__(
         self,
@@ -20,7 +20,7 @@ class SidecarError(Exception):
         self.extra = extra or {}
 
 
-class ModelNotReadyError(SidecarError):
+class ModelNotReadyError(GlobalError):
     """Raised when the model is queried but has not finished loading."""
 
     def __init__(self, message: str = "Translation model is not ready yet", extra: Optional[dict[str, Any]] = None) -> None:
@@ -33,7 +33,7 @@ class ModelNotReadyError(SidecarError):
         )
 
 
-class TranslationTimeoutError(SidecarError):
+class TranslationTimeoutError(GlobalError):
     """Raised when translation pipeline operations exceed configured limits."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
@@ -46,7 +46,7 @@ class TranslationTimeoutError(SidecarError):
         )
 
 
-class UnsupportedMediaError(SidecarError):
+class UnsupportedMediaError(GlobalError):
     """Raised when an unsupported image type or format is loaded."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
@@ -59,7 +59,7 @@ class UnsupportedMediaError(SidecarError):
         )
 
 
-class InvalidInputError(SidecarError):
+class InvalidInputError(GlobalError):
     """Raised when input parameters, paths or arguments are malformed."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
@@ -72,20 +72,20 @@ class InvalidInputError(SidecarError):
         )
 
 
-class SidecarUnavailableError(SidecarError):
-    """Raised when required sidecar resources/subprocesses are completely missing."""
+class GlobalUnavailableError(GlobalError):
+    """Raised when required resources/subprocesses are completely missing."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
-            error_code="SIDECAR_UNAVAILABLE",
+            error_code="GLOBAL_UNAVAILABLE",
             status_code=503,
             retryable=True,
             extra=extra,
         )
 
 
-class InternalPipelineError(SidecarError):
+class InternalPipelineError(GlobalError):
     """Raised on unforeseen internal pipeline/inference failures."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:

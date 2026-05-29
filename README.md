@@ -186,7 +186,7 @@ OverlayTranslator/
 │   ├── config.py                   # Global Settings class
 │   ├── service.py                  # TranslationPipelineCLI (orchestrator)
 │   ├── core/
-│   │   ├── exceptions.py           # Error hierarchy (SidecarError, etc.)
+│   │   ├── exceptions.py           # Error hierarchy (GlobalError, etc.)
 │   │   └── logger.py               # Logging setup
 │   ├── manga_translator/
 │   │   ├── detection/
@@ -590,7 +590,7 @@ Exception hierarchy in [app/core/exceptions.py](app/exceptions.py):
 
 | Exception | HTTP | Retryable | Description |
 |-----------|------|-----------|-------------|
-| `SidecarError` | 500 | Yes | Base error; retry recommended |
+| `GlobalError` | 500 | Yes | Base error; retry recommended |
 | `ModelNotReadyError` | 503 | Yes | Pipeline still initializing |
 | `InvalidInputError` | 400 | No | Bad image path or parameters |
 | `TranslationTimeoutError` | 504 | Yes | Translation took too long |

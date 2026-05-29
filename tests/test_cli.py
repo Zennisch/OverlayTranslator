@@ -110,8 +110,8 @@ async def test_cli_success(mock_pipeline_class, mock_print, mock_exit, mock_pars
 @patch("sys.exit")
 @patch("builtins.print")
 @patch("app.service.TranslationPipelineCLI")
-async def test_cli_sidecar_error(mock_pipeline_class, mock_print, mock_exit, mock_parse_args, mock_exists):
-    """Test that raising a SidecarError prints a JSON error with its specific error code and exits with 1."""
+async def test_cli_global_error(mock_pipeline_class, mock_print, mock_exit, mock_parse_args, mock_exists):
+    """Test that raising a GlobalError prints a JSON error with its specific error code and exits with 1."""
     args = MagicMock()
     args.imagePath = "existing_image.png"
     args.postId = "789"

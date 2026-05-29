@@ -5,7 +5,7 @@ import os
 import sys
 
 from app.config import settings
-from app.exceptions import SidecarError
+from app.exceptions import GlobalError
 from app.logger import get_core_logger, setup_logging
 
 setup_logging()
@@ -124,7 +124,7 @@ async def async_main():
 
     if args.logLevel:
         settings.log_level = args.logLevel
-        setup_logging()    
+        setup_logging()
 
     if args.detectionSize is not None:
         settings.detection_size = args.detectionSize
@@ -184,8 +184,8 @@ async def async_main():
 
         sys.exit(0)
 
-    except SidecarError as exc:
-        logger.exception("Pipeline failed with SidecarError")
+    except GlobalError as exc:
+        logger.exception("Pipeline failed with GlobalError")
         err_json = {
             "postId": args.postId,
             "imagePath": args.imagePath,

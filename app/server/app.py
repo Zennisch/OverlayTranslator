@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.exceptions import SidecarError
+from app.exceptions import GlobalError
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
 from app.server.schemas import (
@@ -83,7 +83,7 @@ def create_app() -> FastAPI:
 
             return TranslateResponse(**result)
 
-        except SidecarError as exc:
+        except GlobalError as exc:
             raise HTTPException(
                 status_code=exc.status_code,
                 detail=ErrorResponse(
