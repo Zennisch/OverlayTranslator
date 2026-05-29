@@ -1,0 +1,16 @@
+[project]
+name = "OverlayTranslator"
+version = "0.1.0"
+description = "Detect/OCR/Translate overlay sidecar for Emiru"
+requires-python = ">=3.11,<3.13"
+
+[tool.black]
+line-length = 128
+target-version = ["py311", "py312"]
+
+[tool.ruff]
+line-length = 128
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

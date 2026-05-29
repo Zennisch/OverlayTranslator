@@ -1,0 +1,10 @@
+.idea/
+.ruff_cache
+.venv/
+build/
+dist/
+*.log
+*.spec
+**/__pycache__/
+**/*.pyc
+**/models/

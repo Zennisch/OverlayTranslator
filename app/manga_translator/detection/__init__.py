@@ -1,0 +1,1 @@
+"""Minimal streamlined detection package."""
