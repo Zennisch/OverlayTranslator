@@ -58,10 +58,8 @@ class TranslateResponse(BaseModel):
     """Translation response with results and timings."""
     postId: str
     imagePath: str
-    originalSize: Dict[str, int]
-    translator: str
-    elapsedMs: int
-    timings: TranslationTimings
+    originalSize: Optional[Dict[str, int]] = None
+    timings: Optional[TranslationTimings] = None
     overlays: List[TextOverlay]
 
 
