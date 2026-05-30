@@ -1,5 +1,5 @@
 """Shared Data Transfer Objects for CLI and Server modes."""
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -33,18 +33,53 @@ class TranslationTimings(BaseModel):
 
 
 class TranslationResponse(BaseModel):
-    """Complete translation response (used by both CLI verbose mode and Server mode)."""
+    """Complete translation response (used by both CLI and Server modes)."""
 
     postId: str = Field(..., description="Post/metadata ID")
     imagePath: str = Field(..., description="Path to the translated image")
-    originalSize: Dict[str, int] = Field(..., description="Image dimensions: width, height")
-    timings: TranslationTimings = Field(..., description="Timing breakdown")
+    originalSize: Optional[Dict[str, int]] = Field(None, description="Image dimensions: width, height")
+    timings: Optional[TranslationTimings] = Field(None, description="Timing breakdown")
     overlays: List[TextOverlay] = Field(..., description="Translated text regions")
 
 
-class TranslationResponseMinimal(BaseModel):
-    """Minimal translation response (used by CLI non-verbose mode)."""
+# Request schemas
+class TranslateRequest(BaseModel):
+    """Translation request payload."""
 
-    postId: str = Field(..., description="Post/metadata ID")
-    imagePath: str = Field(..., description="Path to the translated image")
-    overlays: List[TextOverlay] = Field(..., description="Translated text regions")
+    imagePath: str = Field(..., description="Absolute path to the image file to translate")
+    postId: Optional[str] = Field("0", description="Optional post/metadata ID")
+    sourceLang: Optional[str] = Field("JPN", description="Source language (JPN, ENG, etc. or 'auto' for auto-detection)")
+    targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
+
+    # Detection parameters
+    detectionSize: Optional[int] = Field(None, description="Detection input size")
+    textThreshold: Optional[float] = Field(None, description="Detection text threshold")
+    boxThreshold: Optional[float] = Field(None, description="Detection box threshold")
+    unclipRatio: Optional[float] = Field(None, description="Detection unclip ratio")
+    detInvert: Optional[bool] = Field(None, description="Invert detection input")
+    detGammaCorrect: Optional[bool] = Field(None, description="Apply gamma correction to detection")
+    detRotate: Optional[bool] = Field(None, description="Enable detection rotation")
+    detAutoRotate: Optional[bool] = Field(None, description="Enable detection auto-rotation")
+
+    # Misc
+    verbose: Optional[bool] = Field(None, description="Enable verbose logging")
+
+
+class HealthResponse(BaseModel):
+    """Health check response."""
+
+    status: str = Field(..., description="Pipeline status: initializing, ready, or failed")
+    ready: bool = Field(..., description="True if pipeline is ready to handle requests")
+    error: Optional[str] = Field(None, description="Error message if status is failed")
+    device: Optional[str] = Field(None, description="Device used for execution (always cpu)")
+    system_memory_gb: Optional[float] = Field(None, description="Total system RAM in GB")
+    system_memory_used_gb: Optional[float] = Field(None, description="Used system RAM in GB")
+
+
+class ErrorResponse(BaseModel):
+    """Error response body."""
+
+    error: str = Field(..., description="Error message")
+    errorCode: str = Field(..., description="Error code (e.g., INVALID_INPUT, MODEL_NOT_READY)")
+    status: str = Field("error", description="Status indicator")
+    retryable: Optional[bool] = Field(None, description="Whether the request can be retried")

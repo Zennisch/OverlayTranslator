@@ -77,7 +77,6 @@ def build(release=False):
         "--hidden-import=app.server.app",
         "--hidden-import=app.server.launcher",
         "--hidden-import=app.server.pipeline_manager",
-        "--hidden-import=app.server.schemas",
         "--clean",
         entry_point,
     ]

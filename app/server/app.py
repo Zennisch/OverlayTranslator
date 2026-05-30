@@ -4,15 +4,10 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
+from app.dto import ErrorResponse, HealthResponse, TranslateRequest, TranslateResponse
 from app.exceptions import GlobalError
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
-from app.server.schemas import (
-    ErrorResponse,
-    HealthResponse,
-    TranslateRequest,
-    TranslateResponse,
-)
 
 logger = get_core_logger("fastapi_app")
 

@@ -122,20 +122,20 @@ class TranslationPipelineCLI:
         detected_textlines = len(textlines)
 
         def build_response(overlays: list, timings_dict: dict, verbose: bool) -> dict:
+            response = {
+                "postId": post_id,
+                "imagePath": image_path,
+                "overlays": overlays,
+            }
+            
             if verbose:
-                return {
-                    "postId": post_id,
-                    "imagePath": image_path,
-                    "originalSize": {"width": img_width, "height": img_height},
-                    "timings": timings_dict,
-                    "overlays": overlays,
-                }
+                response["originalSize"] = {"width": img_width, "height": img_height}
+                response["timings"] = timings_dict
             else:
-                return {
-                    "postId": post_id,
-                    "imagePath": image_path,
-                    "overlays": overlays,
-                }
+                response["originalSize"] = None
+                response["timings"] = None
+            
+            return response
 
         # Handle case when no text is detected
         if not textlines:
