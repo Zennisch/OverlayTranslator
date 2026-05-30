@@ -1,10 +1,11 @@
 """Shared Data Transfer Objects for CLI and Server modes."""
+
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
 
-class TextOverlay(BaseModel):
+class TranslationTextOverlay(BaseModel):
     """Translated text overlay region."""
 
     id: str = Field(..., description="Region identifier (r-{index})")
@@ -32,24 +33,13 @@ class TranslationTimings(BaseModel):
     mergedRegions: int = Field(..., description="Text regions after merging")
 
 
-class TranslationResponse(BaseModel):
-    """Complete translation response (used by both CLI and Server modes)."""
-
-    postId: str = Field(..., description="Post/metadata ID")
-    imagePath: str = Field(..., description="Path to the translated image")
-    originalSize: Optional[Dict[str, int]] = Field(None, description="Image dimensions: width, height")
-    timings: Optional[TranslationTimings] = Field(None, description="Timing breakdown")
-    overlays: List[TextOverlay] = Field(..., description="Translated text regions")
-
-
-# Request schemas
-class TranslateRequest(BaseModel):
+class TranslationRequest(BaseModel):
     """Translation request payload."""
 
     imagePath: str = Field(..., description="Absolute path to the image file to translate")
-    postId: Optional[str] = Field("0", description="Optional post/metadata ID")
-    sourceLang: Optional[str] = Field("JPN", description="Source language (JPN, ENG, etc. or 'auto' for auto-detection)")
-    targetLang: Optional[str] = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
+    postId: str = Field("0", description="Optional post/metadata ID")
+    sourceLang: str = Field("JPN", description="Source language (JPN, ENG, etc. or 'auto' for auto-detection)")
+    targetLang: str = Field("ENG", description="Target translation language (e.g., ENG, VIE)")
 
     # Detection parameters
     detectionSize: Optional[int] = Field(None, description="Detection input size")
@@ -63,6 +53,16 @@ class TranslateRequest(BaseModel):
 
     # Misc
     verbose: Optional[bool] = Field(None, description="Enable verbose logging")
+
+
+class TranslationResponse(BaseModel):
+    """Complete translation response (used by both CLI and Server modes)."""
+
+    postId: str = Field(..., description="Post/metadata ID")
+    imagePath: str = Field(..., description="Path to the translated image")
+    originalSize: Optional[Dict[str, int]] = Field(None, description="Image dimensions: width, height")
+    timings: Optional[TranslationTimings] = Field(None, description="Timing breakdown")
+    overlays: List[TranslationTextOverlay] = Field(..., description="Translated text regions")
 
 
 class HealthResponse(BaseModel):

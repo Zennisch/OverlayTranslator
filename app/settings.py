@@ -1,6 +1,3 @@
-DEVICE = "cpu"
-
-
 class Settings:
     def __init__(self):
         # Configuration properties with static defaults (fully overridden by CLI flags)
@@ -24,5 +21,7 @@ class Settings:
         self.server_port = 7861
         self.server_blocking_init = True
 
+        # Non-configurable properties
+        self.device = "cpu"
 
 settings = Settings()

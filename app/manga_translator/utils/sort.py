@@ -8,7 +8,6 @@ from .textblock import TextBlock
 def sort_regions(
     regions: List[TextBlock],
     right_to_left: bool = True,
-    img: np.ndarray = None,
     force_simple_sort: bool = False,
 ) -> List[TextBlock]:
     """

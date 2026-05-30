@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 
-class GlobalError(Exception):
+class InternalError(Exception):
     """Base exception for all errors."""
 
     def __init__(
@@ -20,7 +20,7 @@ class GlobalError(Exception):
         self.extra = extra or {}
 
 
-class ModelNotReadyError(GlobalError):
+class ModelNotReadyError(InternalError):
     """Raised when the model is queried but has not finished loading."""
 
     def __init__(self, message: str = "Translation model is not ready yet", extra: Optional[dict[str, Any]] = None) -> None:
@@ -33,20 +33,20 @@ class ModelNotReadyError(GlobalError):
         )
 
 
-class TranslationTimeoutError(GlobalError):
+class TranslationTimeoutError(InternalError):
     """Raised when translation pipeline operations exceed configured limits."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
-            error_code="TIMEOUT",
+            error_code="TRANSLATION_TIMEOUT",
             status_code=504,
             retryable=True,
             extra=extra,
         )
 
 
-class UnsupportedMediaError(GlobalError):
+class UnsupportedMediaError(InternalError):
     """Raised when an unsupported image type or format is loaded."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
@@ -59,7 +59,7 @@ class UnsupportedMediaError(GlobalError):
         )
 
 
-class InvalidInputError(GlobalError):
+class InvalidInputError(InternalError):
     """Raised when input parameters, paths or arguments are malformed."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
@@ -72,26 +72,26 @@ class InvalidInputError(GlobalError):
         )
 
 
-class GlobalUnavailableError(GlobalError):
+class UnavailableError(InternalError):
     """Raised when required resources/subprocesses are completely missing."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
-            error_code="GLOBAL_UNAVAILABLE",
+            error_code="UNAVAILABLE",
             status_code=503,
             retryable=True,
             extra=extra,
         )
 
 
-class InternalPipelineError(GlobalError):
+class PipelineError(InternalError):
     """Raised on unforeseen internal pipeline/inference failures."""
 
     def __init__(self, message: str, extra: Optional[dict[str, Any]] = None) -> None:
         super().__init__(
             message=message,
-            error_code="INTERNAL_ERROR",
+            error_code="PIPELINE_ERROR",
             status_code=500,
             retryable=True,
             extra=extra,

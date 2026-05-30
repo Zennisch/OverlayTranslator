@@ -6,10 +6,10 @@ from typing import Any, Dict, Optional
 
 import psutil
 
-from app.settings import settings, DEVICE
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
 from app.service import TranslationPipelineCLI
+from app.settings import settings
 
 logger = get_core_logger("pipeline_manager")
 
@@ -25,7 +25,7 @@ class PipelineStatus(str, Enum):
 class PipelineManager:
     """Singleton manager for the translation pipeline to avoid cold starts."""
 
-    _instance: Optional["PipelineManager"] = None
+    _instance: "PipelineManager" = None
     _lock = asyncio.Lock()
 
     def __new__(cls) -> "PipelineManager":
@@ -38,7 +38,7 @@ class PipelineManager:
             return
 
         self._initialized = True
-        self._pipeline: Optional[TranslationPipelineCLI] = None
+        self._pipeline: TranslationPipelineCLI
         self._status: PipelineStatus = PipelineStatus.INITIALIZING
         self._error_message: Optional[str] = None
         self._initialization_task: Optional[asyncio.Task] = None
@@ -50,23 +50,19 @@ class PipelineManager:
 
     def get_status(self) -> Dict[str, Any]:
         """Get detailed pipeline status information."""
-        status_dict = {
-            "status": self._status.value,
-            "ready": self.is_ready,
-        }
+        status_dict = {}
+        status_dict["status"] = self._status.value
+        status_dict["ready"] = self.is_ready
 
         if self._status == PipelineStatus.FAILED and self._error_message:
             status_dict["error"] = self._error_message
 
-        if self._pipeline and self._pipeline._ready:
+        if self._pipeline is not None and self._pipeline._ready:
             try:
-                # Get system memory info
                 vm = psutil.virtual_memory()
                 status_dict["system_memory_gb"] = round(vm.total / (1024**3), 2)
                 status_dict["system_memory_used_gb"] = round(vm.used / (1024**3), 2)
-
-                # Device is always CPU (hardcoded)
-                status_dict["device"] = DEVICE
+                status_dict["device"] = settings.device
             except Exception as exc:
                 logger.warning(f"Failed to get detailed status: {exc}")
 
@@ -85,6 +81,7 @@ class PipelineManager:
             try:
                 logger.info("Starting pipeline initialization...")
                 self._pipeline = TranslationPipelineCLI()
+                # Todo: Warning "Member 'None' of 'TranslationPipelineCLI | None' does not have attribute 'initialize'"
                 await self._pipeline.initialize()
 
                 self._status = PipelineStatus.READY
@@ -97,7 +94,7 @@ class PipelineManager:
                 raise
 
     async def translate(
-        self, image_path: str, post_id: str = "0", target_lang: str = "ENG", **optional_settings
+        self, image_path: str, post_id: str = "0", source_lang: str = "JPN", target_lang: str = "ENG", **optional_settings
     ) -> Dict[str, Any]:
         """
         Translate an image using the pipeline.
@@ -105,6 +102,7 @@ class PipelineManager:
         Args:
             image_path: Absolute path to the image file
             post_id: Optional metadata ID
+            source_lang: Source language (e.g., "JPN", "auto" for auto-detection)
             target_lang: Target translation language (e.g., "ENG", "VIE")
             **optional_settings: Optional CLI flags to override defaults
                 - detectionSize: Detection input size
@@ -114,8 +112,7 @@ class PipelineManager:
                 - detInvert: Invert detection input
                 - detGammaCorrect: Apply gamma correction
                 - detRotate: Enable detection rotation
-                - detAutoRotate: Enable detection auto-rotation
-                - sourceLang: Source language for translation
+                - detAutoRotate: Enable detection autorotation
 
         Returns:
             Dictionary with translation results
@@ -156,7 +153,8 @@ class PipelineManager:
             settings.target_lang = target_lang
 
             # Execute translation
-            result = await self._pipeline.translate_image(image_path, post_id, target_lang)
+            assert self._pipeline is not None, "Pipeline should be initialized before translate"
+            result = await self._pipeline.translate_image(image_path, post_id, source_lang, target_lang)
             return result
 
         finally:

@@ -5,7 +5,7 @@ import os
 import sys
 
 from app.settings import settings
-from app.exceptions import GlobalError
+from app.exceptions import InternalError
 from app.logger import get_core_logger, setup_logging
 
 setup_logging()
@@ -106,7 +106,6 @@ async def async_main():
 
     args = parser.parse_args()
 
-    # If server mode, launch server and exit
     if args.server:
         logger.info(f"Starting server mode on port {args.serverPort}")
         from app.server.launcher import run_server
@@ -114,11 +113,9 @@ async def async_main():
         await run_server(port=args.serverPort)
         return
 
-    # Validate arguments based on mode
     if not args.server and not args.imagePath:
         parser.error("--imagePath is required for CLI mode (or use --server for server mode)")
 
-    # Sync CLI args with settings
     settings.source_lang = args.sourceLang
     settings.target_lang = args.targetLang
 
@@ -146,7 +143,7 @@ async def async_main():
     if args.verbose:
         settings.verbose = True
 
-    logger.info(f"Starting standalone translation pipeline for image: {args.imagePath} (postId: {args.postId})")
+    logger.info(f"Starting standalone translation pipeline with args {[f'{k}={v}' for k, v in vars(args).items() if k not in ['server', 'serverPort']]}]")
 
     if not os.path.exists(args.imagePath):
         err_json = {
@@ -156,36 +153,24 @@ async def async_main():
             "errorCode": "INVALID_INPUT",
             "status": "error",
         }
-        # Print directly to stdout for Electron to capture
         print(json.dumps(err_json, indent=2))
         sys.exit(1)
 
     try:
-        from app.service import TranslationPipelineCLI
-
-        pipeline = TranslationPipelineCLI()
-
         logger.info("Initializing models (Detector, OCR, Translator)...")
+
+        from app.service import TranslationPipelineCLI
+        pipeline = TranslationPipelineCLI()
         await pipeline.initialize()
 
         logger.info("Executing image translation pipeline...")
-        result = await pipeline.translate_image(image_path=args.imagePath, post_id=args.postId, target_lang=args.targetLang)
+        result = await pipeline.translate_image(image_path=args.imagePath, post_id=args.postId, source_lang=args.sourceLang, target_lang=args.targetLang)
 
-        # Return pure JSON to stdout
         print(json.dumps(result, indent=2))
-
-        # Wait for any active background probe thread to finish before exiting (so cache can be written)
-        import threading
-
-        for t in threading.enumerate():
-            if t.name == "BackgroundProbe":
-                logger.info("Waiting for background layer probing to complete before exiting...")
-                t.join()
-
         sys.exit(0)
 
-    except GlobalError as exc:
-        logger.exception("Pipeline failed with GlobalError")
+    except InternalError as exc:
+        logger.exception("Pipeline failed with InternalError")
         err_json = {
             "postId": args.postId,
             "imagePath": args.imagePath,

@@ -8,17 +8,16 @@ import tempfile
 from abc import ABC, abstractmethod
 from functools import cached_property
 
-import torch
-
 from app.logger import get_translator_logger
 
 from .generic import (
-    BASE_PATH,
     download_url_with_progressbar,
     get_digest,
     get_filename_from_url,
     replace_prefix,
 )
+
+from app import BASE_PATH
 
 
 class InfererModule(ABC):
@@ -71,9 +70,6 @@ class ModelWrapper(ABC):
 
     def _get_file_path(self, *args) -> str:
         return os.path.join(self.model_dir, *args)
-
-    def _get_used_gpu_memory(self) -> bool:
-        return torch.cuda.mem_get_info()
 
     def _check_for_malformed_model_mapping(self):
         for map_key, mapping in self._MODEL_MAPPING.items():
@@ -234,6 +230,15 @@ class ModelWrapper(ABC):
         elif "archive" in mapping:
             for orig, dest in mapping["archive"].items():
                 if os.path.basename(dest) in ("", "."):
+                    # Todo: Unexpected type(s):
+                    # (Any, str | bytes | LiteralString)
+                    # Possible type(s):
+                    # (LiteralString, LiteralString)
+                    # (str | PathLike[str], str | PathLike[str])
+                    # (bytes | PathLike[bytes], bytes | PathLike[bytes])
+                    # (LiteralString, LiteralString)
+                    # (str | PathLike[str], str | PathLike[str])
+                    # (bytes | PathLike[bytes], bytes | PathLike[bytes])
                     dest = os.path.join(dest, os.path.basename(orig[:-1] if orig.endswith("/") else orig))
                 if not os.path.exists(self._get_file_path(dest)):
                     return False

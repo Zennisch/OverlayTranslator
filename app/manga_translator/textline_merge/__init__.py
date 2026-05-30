@@ -42,7 +42,7 @@ def split_text_region(
         G.add_node(idx)
     for u, v in itertools.combinations(connected_region_indices, 2):
         G.add_edge(u, v, weight=bboxes[u].distance(bboxes[v]))
-    # Get distances from neighbouring bboxes
+    # Get distances from neighboring bboxes
     edges = nx.algorithms.tree.minimum_spanning_edges(G, algorithm="kruskal", data=True)
     edges = sorted(edges, key=lambda a: a[2]["weight"], reverse=True)
     distances_sorted = [a[2]["weight"] for a in edges]

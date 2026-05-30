@@ -1,15 +1,16 @@
 import time
 
-from manga_translator.detection.default import DefaultDetector
-from manga_translator.ocr import Model48pxOCR, Ocr, OcrConfig
-from manga_translator.textline_merge import dispatch as dispatch_textline_merge
-from manga_translator.translators.deep_translator import DeepTranslator
-from manga_translator.utils import load_image
 from PIL import Image
 
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
-from app.settings import DEVICE, settings
+from app.settings import settings
+from manga_translator.detection.default import DefaultDetector
+from manga_translator.ocr import Model48pxOCR, Ocr, OcrConfig
+from manga_translator.textline_merge import dispatch as dispatch_textline_merge
+from manga_translator.translators.common import OfflineTranslator
+from manga_translator.translators.deep_translator import DeepTranslator
+from manga_translator.utils import load_image
 
 logger = get_core_logger("service")
 
@@ -17,30 +18,26 @@ logger = get_core_logger("service")
 def _to_overlay_item(idx: int, region, source_lang: str) -> dict:
     xywh = region.xywh
     min_rect = region.min_rect[0]
-
-    confidence = float(region.prob if region.prob is not None else 0.0)
-    confidence = max(0.0, min(1.0, confidence))
-
-    polygon = [
-        {"x": float(min_rect[0][0]), "y": float(min_rect[0][1])},
-        {"x": float(min_rect[1][0]), "y": float(min_rect[1][1])},
-        {"x": float(min_rect[2][0]), "y": float(min_rect[2][1])},
-        {"x": float(min_rect[3][0]), "y": float(min_rect[3][1])},
-    ]
+    confidence = min(1.0, max(0.0, float(region.prob or 0.0)))
 
     return {
-        "id": f"r-{idx}",
-        "xywh": {
-            "x": float(xywh[0]),
-            "y": float(xywh[1]),
-            "width": float(xywh[2]),
-            "height": float(xywh[3]),
-        },
-        "polygon": polygon,
-        "sourceText": str(region.text or ""),
-        "translatedText": str(region.translation or ""),
-        "confidence": confidence,
-        "sourceLang": source_lang,
+      "id": f"r-{idx}",
+      "xywh": {
+          "x": float(xywh[0]),
+          "y": float(xywh[1]),
+          "width": float(xywh[2]),
+          "height": float(xywh[3]),
+      },
+      "polygon": [
+          {"x": float(min_rect[0][0]), "y": float(min_rect[0][1])},
+          {"x": float(min_rect[1][0]), "y": float(min_rect[1][1])},
+          {"x": float(min_rect[2][0]), "y": float(min_rect[2][1])},
+          {"x": float(min_rect[3][0]), "y": float(min_rect[3][1])},
+      ],
+      "sourceText": str(region.text or ""),
+      "translatedText": str(region.translation or ""),
+      "confidence": confidence,
+      "sourceLang": source_lang,
     }
 
 
@@ -50,7 +47,7 @@ class TranslationPipelineCLI:
 
         self._detector: DefaultDetector = None
         self._ocr: Model48pxOCR = None
-        self._translator = None
+        self._translator: OfflineTranslator = None
         self._ocr_config: OcrConfig = None
 
     async def initialize(self) -> None:
@@ -67,23 +64,41 @@ class TranslationPipelineCLI:
             self._translator = DeepTranslator()
             logger.info("Using DeepTranslator backend (Google Translate)")
 
-            await self._detector.load(DEVICE)
-            await self._ocr.load(DEVICE)
-            await self._translator.load(settings.source_lang, settings.target_lang, DEVICE)
+            await self._detector.load(settings.device)
+            await self._ocr.load(settings.device)
+            await self._translator.load(settings.source_lang, settings.target_lang, settings.device)
 
             self._ready = True
-            logger.info(f"Models successfully initialized: device={DEVICE}")
+            logger.info(f"Models successfully initialized: device={settings.device}")
 
         except Exception as exc:
             self._ready = False
             logger.error(f"Initialization failed: {exc}")
             raise
 
-    async def translate_image(self, image_path: str, post_id: str, target_lang: str) -> dict:
+    async def translate_image(self, image_path: str, post_id: str, source_lang: str, target_lang: str) -> dict:
         """
         Loads the image, runs detection -> OCR -> Paragraph Merging -> LLM Translation -> Normalization,
         returning a standard output dictionary.
+
+        Args:
+            image_path: Path to the image to translate
+            post_id: Post/metadata ID for tracking
+            source_lang: Source language code (e.g., 'JPN', 'ENG', 'auto' for auto-detection)
+            target_lang: Target language code (e.g., 'ENG', 'VIE')
         """
+        def build_response(overlays_list: list, timings_dict: dict, verbose: bool) -> dict:
+            response = {}
+            response["postId"] = post_id
+            response["imagePath"] = image_path
+            response["overlays"] = overlays_list
+
+            if verbose:
+                response["originalSize"] = {"width": img_width, "height": img_height}
+                response["timings"] = timings_dict
+
+            return response
+
         if not self._ready:
             raise ModelNotReadyError("Pipeline is not ready")
 
@@ -121,23 +136,6 @@ class TranslationPipelineCLI:
         detect_ms = int((time.perf_counter() - t0) * 1000)
         detected_textlines = len(textlines)
 
-        def build_response(overlays: list, timings_dict: dict, verbose: bool) -> dict:
-            response = {
-                "postId": post_id,
-                "imagePath": image_path,
-                "overlays": overlays,
-            }
-
-            if verbose:
-                response["originalSize"] = {"width": img_width, "height": img_height}
-                response["timings"] = timings_dict
-            else:
-                response["originalSize"] = None
-                response["timings"] = None
-
-            return response
-
-        # Handle case when no text is detected
         if not textlines:
             total_ms = int((time.perf_counter() - started) * 1000)
             return build_response(
@@ -150,7 +148,7 @@ class TranslationPipelineCLI:
                     "ocrMs": 0,
                     "mergeMs": 0,
                     "translateMs": 0,
-                    "device": DEVICE,
+                    "device": settings.device,
                     "detectedTextlines": 0,
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
@@ -179,7 +177,7 @@ class TranslationPipelineCLI:
                     "ocrMs": ocr_ms,
                     "mergeMs": 0,
                     "translateMs": 0,
-                    "device": DEVICE,
+                    "device": settings.device,
                     "detectedTextlines": detected_textlines,
                     "recognizedTextlines": 0,
                     "mergedRegions": 0,
@@ -201,7 +199,7 @@ class TranslationPipelineCLI:
         # 6. Translation
         queries = [str(region.text or "") for region in text_regions]
         t0 = time.perf_counter()
-        translations = await self._translator.translate("auto", target_lang, queries, use_mtpe=False)
+        translations = await self._translator.translate(source_lang, target_lang, queries, use_mtpe=False)
         translate_ms = int((time.perf_counter() - t0) * 1000)
 
         # 7. Build final overlays list
@@ -221,7 +219,7 @@ class TranslationPipelineCLI:
                 "ocrMs": ocr_ms,
                 "mergeMs": merge_ms,
                 "translateMs": translate_ms,
-                "device": DEVICE,
+                "device": settings.device,
                 "detectedTextlines": detected_textlines,
                 "recognizedTextlines": recognized_textlines,
                 "mergedRegions": merged_regions,

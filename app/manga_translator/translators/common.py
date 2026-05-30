@@ -31,7 +31,6 @@ VALID_LANGUAGES = {
     "TRK": "Turkish",
     "UKR": "Ukrainian",
     "VIN": "Vietnamese",
-    "ARA": "Arabic",
     "CNR": "Montenegrin",
     "SRP": "Serbian",
     "HRV": "Croatian",
@@ -59,7 +58,6 @@ ISO_639_1_TO_VALID_LANGUAGES = {
     "es": "ESP",
     "tr": "TRK",
     "uk": "UKR",
-    "ar": "ARA",
     "cnr": "CNR",
     "sr": "SRP",
     "hr": "HRV",
@@ -100,6 +98,7 @@ class MTPEAdapter:
         return new_translations
 
 
+# Todo: If we don't use LLM model for translation anymore, we can completely remove the CommonTranslator and just use OfflineTranslator as the base class for all translators.
 class CommonTranslator(InfererModule):
     _LANGUAGE_CODE_MAP = {}
     _INVALID_REPEAT_COUNT = 0
@@ -197,12 +196,6 @@ class CommonTranslator(InfererModule):
 
         translations = [self._clean_translation_output(q, r, to_lang) for q, r in zip(queries, translations)]
 
-        if to_lang == "ARA":
-            import arabic_reshaper
-            import bidi.algorithm
-
-            translations = [bidi.algorithm.get_display(arabic_reshaper.reshape(t)) for t in translations]
-
         if use_mtpe:
             translations = await self.mtpe_adapter.dispatch(queries, translations)
 
@@ -248,10 +241,6 @@ class CommonTranslator(InfererModule):
         trans = re.sub(r"(?<![.,;!?])([.,;!?])(?=\w)", r"\1 ", trans)
         trans = re.sub(r"([.,;!?])\s+(?=[.,;!?]|$)", r"\1", trans)
 
-        if to_lang != "ARA":
-            trans = re.sub(r"(?<=[.,;!?\w])\s+([.,;!?])", r"\1", trans)
-            trans = re.sub(r"((?:\s|^)\.+)\s+(?=\w)", r"\1", trans)
-
         seq = repeating_sequence(trans.lower())
 
         if len(trans) < len(query) and len(seq) < 0.5 * len(trans):
@@ -260,10 +249,8 @@ class CommonTranslator(InfererModule):
 
         return trans
 
-
+# Todo: Warning "Signature of method 'OfflineTranslator.many_func()' does not match signature of the base method in class 'ModelWrapper'"
 class OfflineTranslator(CommonTranslator, ModelWrapper):
-    _MODEL_SUB_DIR = "translators"
-
     async def _translate(self, *args, **kwargs):
         return await self.infer(*args, **kwargs)
 

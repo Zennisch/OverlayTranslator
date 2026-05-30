@@ -13,7 +13,7 @@ class TextBlock(object):
     def __init__(
         self,
         lines: List[Tuple[int, int, int, int]],
-        texts: List[str] = None,
+        texts: List[str],
         translation: str = "",
         prob: float = 1.0,
         language: str = "unknown",
@@ -82,6 +82,7 @@ class TextBlock(object):
     @property
     def polygon_object(self) -> Polygon:
         min_rect = self.min_rect[0]
+        # Todo: Warning "Expected type 'Polygon', got 'MultiPoint' instead "
         return MultiPoint([tuple(min_rect[0]), tuple(min_rect[1]), tuple(min_rect[2]), tuple(min_rect[3])]).convex_hull
 
     @property

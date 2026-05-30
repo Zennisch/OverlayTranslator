@@ -13,17 +13,6 @@ import tqdm
 from PIL import Image
 from shapely.geometry import MultiPoint, Polygon
 
-# Resolve BASE_PATH
-if getattr(sys, "frozen", False):
-    # Packaged production mode
-    BASE_PATH = os.path.dirname(sys.executable)
-else:
-    # Development mode
-    MODULE_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    BASE_PATH = os.path.dirname(MODULE_PATH)
-
-
-# Context class
 class Context(dict):
     def __init__(self, **kwargs):
         for name in kwargs:

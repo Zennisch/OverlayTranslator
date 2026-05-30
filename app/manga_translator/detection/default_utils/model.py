@@ -66,7 +66,7 @@ class DBHead(nn.Module):
             ]
             if out_channels == 1:
                 module_list.append(nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=1, bias=True))
-            return nn.Sequential(module_list)
+            return nn.Sequential(*module_list)
         else:
             return nn.ConvTranspose2d(in_channels, out_channels, 4, 2, 1)
 

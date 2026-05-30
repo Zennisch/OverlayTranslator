@@ -53,13 +53,9 @@ class DeepTranslator(OfflineTranslator):
             test_translator = GoogleTranslator(source=self._from_lang, target=self._to_lang)
             self._translator = test_translator
 
-            self.logger.info(
-                f"Deep-Translator initialized: {from_lang} -> {to_lang} (GoogleTranslator backend)"
-            )
+            self.logger.info(f"Deep-Translator initialized: {from_lang} -> {to_lang} (GoogleTranslator backend)")
         except ImportError:
-            raise RuntimeError(
-                "deep-translator is not installed. Install it with: pip install deep-translator"
-            )
+            raise RuntimeError("deep-translator is not installed. Install it with: pip install deep-translator")
         except Exception as exc:
             self.logger.error(f"Failed to initialize Deep-Translator: {exc}")
             raise
@@ -88,9 +84,7 @@ class DeepTranslator(OfflineTranslator):
                     continue
 
                 # Run synchronous translation in executor to avoid blocking
-                translation = await loop.run_in_executor(
-                    None, lambda q=query: translator.translate(q)
-                )
+                translation = await loop.run_in_executor(None, lambda q=query: translator.translate(q))
                 translations.append(translation or "")
 
             self.logger.debug(f"Translated {len(queries)} queries using GoogleTranslator")

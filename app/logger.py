@@ -32,6 +32,7 @@ def get_core_logger(name: str) -> logging.Logger:
     """Retrieve a child core logger with standard configuration."""
     return logging.getLogger(f"core.{name}")
 
+
 def get_translator_logger(name: str) -> logging.Logger:
-  """Retrieve a child translator logger with standard configuration."""
-  return logging.getLogger(f"translator.{name}")
+    """Retrieve a child translator logger with standard configuration."""
+    return logging.getLogger(f"translator.{name}")
