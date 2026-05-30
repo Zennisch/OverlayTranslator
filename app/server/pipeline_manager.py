@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import psutil
 
-from app.config import settings, DEVICE
+from app.settings import settings, DEVICE
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
 from app.service import TranslationPipelineCLI

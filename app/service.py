@@ -1,6 +1,5 @@
 import time
 
-import torch
 from manga_translator.detection.default import DefaultDetector
 from manga_translator.ocr import Model48pxOCR, Ocr, OcrConfig
 from manga_translator.textline_merge import dispatch as dispatch_textline_merge
@@ -8,11 +7,41 @@ from manga_translator.translators.deep_translator import DeepTranslator
 from manga_translator.utils import load_image
 from PIL import Image
 
-from app.config import settings, DEVICE
 from app.exceptions import ModelNotReadyError
 from app.logger import get_core_logger
+from app.settings import DEVICE, settings
 
 logger = get_core_logger("service")
+
+
+def _to_overlay_item(idx: int, region, source_lang: str) -> dict:
+    xywh = region.xywh
+    min_rect = region.min_rect[0]
+
+    confidence = float(region.prob if region.prob is not None else 0.0)
+    confidence = max(0.0, min(1.0, confidence))
+
+    polygon = [
+        {"x": float(min_rect[0][0]), "y": float(min_rect[0][1])},
+        {"x": float(min_rect[1][0]), "y": float(min_rect[1][1])},
+        {"x": float(min_rect[2][0]), "y": float(min_rect[2][1])},
+        {"x": float(min_rect[3][0]), "y": float(min_rect[3][1])},
+    ]
+
+    return {
+        "id": f"r-{idx}",
+        "xywh": {
+            "x": float(xywh[0]),
+            "y": float(xywh[1]),
+            "width": float(xywh[2]),
+            "height": float(xywh[3]),
+        },
+        "polygon": polygon,
+        "sourceText": str(region.text or ""),
+        "translatedText": str(region.translation or ""),
+        "confidence": confidence,
+        "sourceLang": source_lang,
+    }
 
 
 class TranslationPipelineCLI:
@@ -23,35 +52,6 @@ class TranslationPipelineCLI:
         self._ocr: Model48pxOCR = None
         self._translator = None
         self._ocr_config: OcrConfig = None
-
-    def _to_overlay_item(self, idx: int, region, source_lang: str) -> dict:
-        xywh = region.xywh
-        min_rect = region.min_rect[0]
-
-        confidence = float(region.prob if region.prob is not None else 0.0)
-        confidence = max(0.0, min(1.0, confidence))
-
-        polygon = [
-            {"x": float(min_rect[0][0]), "y": float(min_rect[0][1])},
-            {"x": float(min_rect[1][0]), "y": float(min_rect[1][1])},
-            {"x": float(min_rect[2][0]), "y": float(min_rect[2][1])},
-            {"x": float(min_rect[3][0]), "y": float(min_rect[3][1])},
-        ]
-
-        return {
-            "id": f"r-{idx}",
-            "xywh": {
-                "x": float(xywh[0]),
-                "y": float(xywh[1]),
-                "width": float(xywh[2]),
-                "height": float(xywh[3]),
-            },
-            "polygon": polygon,
-            "sourceText": str(region.text or ""),
-            "translatedText": str(region.translation or ""),
-            "confidence": confidence,
-            "sourceLang": source_lang,
-        }
 
     async def initialize(self) -> None:
         """Asynchronously load and prepare the pipeline detector, OCR, and GGUF LLM models."""
@@ -127,14 +127,14 @@ class TranslationPipelineCLI:
                 "imagePath": image_path,
                 "overlays": overlays,
             }
-            
+
             if verbose:
                 response["originalSize"] = {"width": img_width, "height": img_height}
                 response["timings"] = timings_dict
             else:
                 response["originalSize"] = None
                 response["timings"] = None
-            
+
             return response
 
         # Handle case when no text is detected
@@ -208,7 +208,7 @@ class TranslationPipelineCLI:
         overlays = []
         for idx, region in enumerate(text_regions):
             region.translation = translations[idx] if idx < len(translations) else ""
-            overlays.append(self._to_overlay_item(idx, region, settings.source_lang))
+            overlays.append(_to_overlay_item(idx, region, settings.source_lang))
 
         total_ms = int((time.perf_counter() - started) * 1000)
         return build_response(

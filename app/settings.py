@@ -1,5 +1,3 @@
-# Execution device for all pipeline components (hardcoded to CPU)
-# This is a global constant - all components will use this device
 DEVICE = "cpu"
 
 

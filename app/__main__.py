@@ -4,7 +4,7 @@ import json
 import os
 import sys
 
-from app.config import settings
+from app.settings import settings
 from app.exceptions import GlobalError
 from app.logger import get_core_logger, setup_logging
 

@@ -5,6 +5,7 @@ Builds CPU-only executable with PyTorch (~658MB distribution)
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 
@@ -34,8 +35,6 @@ def build(release=False):
         f"--paths={os.path.join(script_dir, 'app')}",
         # Exclude test files and unnecessary modules to reduce size
         "--exclude-module=pytest",
-        "--exclude-module=test",
-        "--exclude-module=tests",
         # Optimize bytecode
         "--optimize=2",
         # Core dependencies
@@ -50,7 +49,7 @@ def build(release=False):
         "--hidden-import=tqdm",
         "--hidden-import=requests",
         # App modules
-        "--hidden-import=app.config",
+        "--hidden-import=app.settings",
         "--hidden-import=app.service",
         "--hidden-import=app.dto",
         "--hidden-import=app.exceptions",
@@ -82,6 +81,9 @@ def build(release=False):
     ]
 
     try:
+        shutil.rmtree("build", ignore_errors=True)
+        shutil.rmtree("dist", ignore_errors=True)
+
         subprocess.run(args, check=True)
         print("\n✅ Build completed successfully!")
         ext = ".exe" if sys.platform == "win32" else ""

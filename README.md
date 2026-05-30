@@ -439,7 +439,7 @@ curl -X POST http://127.0.0.1:7861/translate \
 
 ## ⚙️ Configuration
 
-All settings are in [app/config.py](app/config.py) with static defaults. Override via CLI arguments.
+All settings are in [app/settings.py](app/settings.py) with static defaults. Override via CLI arguments.
 
 ### Global Settings (Defaults)
 
@@ -473,7 +473,7 @@ Use language code in `--targetLang` or `targetLang` request parameter.
 
 ### CLI Arguments
 
-All CLI arguments override [app/config.py](app/config.py) defaults:
+All CLI arguments override [app/settings.py](app/settings.py) defaults:
 
 ```
 --server                    Run in server mode (default: CLI mode)

@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.dto import ErrorResponse, HealthResponse, TranslateRequest, TranslateResponse
+from app.dto import ErrorResponse, HealthResponse, TranslateRequest, TranslationResponse
 from app.exceptions import GlobalError
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
@@ -42,8 +42,8 @@ def create_app() -> FastAPI:
 
         return response
 
-    @app.post("/translate", response_model=TranslateResponse, tags=["Translation"])
-    async def translate(request: TranslateRequest) -> TranslateResponse:
+    @app.post("/translate", response_model=TranslationResponse, tags=["Translation"])
+    async def translate(request: TranslateRequest) -> TranslationResponse:
         """
         Translate Japanese manga/comic image to target language.
 
@@ -76,7 +76,7 @@ def create_app() -> FastAPI:
                 **optional_settings
             )
 
-            return TranslateResponse(**result)
+            return TranslationResponse(**result)
 
         except GlobalError as exc:
             raise HTTPException(

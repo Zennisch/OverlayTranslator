@@ -3,7 +3,7 @@ torchvision
 torchaudio
 numpy
 Pillow
-opencv-python-headless
+opencv-python
 einops
 networkx
 shapely
@@ -21,4 +21,3 @@ pydantic
 psutil
 py7zr
 zns-logging
-httpx

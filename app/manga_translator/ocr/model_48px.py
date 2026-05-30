@@ -17,6 +17,7 @@ from .common import OfflineOCR
 from .config import OcrConfig
 from .xpos_relative_position import XPOS
 
+
 class Model48pxOCR(OfflineOCR):
     _MODEL_MAPPING = {
         "model": {

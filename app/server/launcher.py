@@ -2,7 +2,7 @@
 
 import uvicorn
 
-from app.config import settings
+from app.settings import settings
 from app.logger import get_core_logger
 from app.server.pipeline_manager import PipelineManager
 
